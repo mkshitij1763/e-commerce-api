@@ -1,217 +1,149 @@
-# e-commerce-api
-perfect 💪 — here’s a **clean, professional, in-depth README.md** written in full Markdown, ready to paste directly into your GitHub repo.
-It’s comprehensive but still elegant — written the way technical leads and recruiters expect.
+
+# 🛍️ E-Commerce API (Node.js + Express + MongoDB)
+
+A full-featured backend API for an e-commerce platform built with **Node.js**, **Express**, and **MongoDB (Atlas)**.  
+Implements authentication, authorization, product management, cart, orders, payments simulation, and security best practices.
 
 ---
 
-```markdown
-# 🛍️ E-Commerce REST API (Node.js + Express + MongoDB)
+## 🚀 Features
 
-A full-stack-ready **E-Commerce backend API** built using **Node.js**, **Express**, and **MongoDB (Atlas)**.  
-It provides all core e-commerce features — user authentication, role-based access, product management, cart, orders, and simulated payments — with production-grade security, validation, and logging.
-
----
-
-## ⚙️ Tech Stack
-
-| Layer | Technology |
-|-------|-------------|
-| Runtime | **Node.js** |
-| Framework | **Express.js** |
-| Database | **MongoDB Atlas** (via **Mongoose**) |
-| Authentication | **JWT (JSON Web Tokens)** |
-| Password Hashing | **bcryptjs** |
-| Security | **helmet**, **xss-clean**, **express-mongo-sanitize**, **hpp**, **express-rate-limit** |
-| Logging | **morgan** (dev) + **winston** (structured logs) |
-| Validation | **express-validator** (optional step) |
-| Transactions | **MongoDB sessions** for atomic stock updates |
-
----
-
-## 🧩 Features Overview
-
-### 👥 User & Authentication
-- Register, login, and profile retrieval (`/api/users/register`, `/api/users/login`, `/api/users/me`)
-- Passwords hashed using bcrypt
-- JWT-based authentication with 1-hour expiry
-- Role-based authorization (`user` / `admin`)
+### 👤 Authentication & Authorization
+- User registration & login using **JWT**
+- Role-based access (**user**, **admin**)
+- Passwords hashed with **bcrypt**
 
 ### 🛒 Products
-- Public: View all products or single product by ID
-- Admin: Create, update, or delete products
-- Stock management and atomic decrement on checkout
+- Public: List & view product details
+- Admin: Create, update, delete products
+- Stock management with automatic decrement on checkout
 
 ### 🧺 Cart
-- Add or remove products from cart
-- Automatically linked to user via JWT
-- Cart stored in MongoDB per user
+- Add / remove items from cart
+- Linked to each authenticated user
+- Auto-clears after successful checkout
 
 ### 📦 Orders
-- Checkout from cart → creates an order
-- Validates product stock before order creation
-- Automatically clears cart after successful checkout
-- Admin can view all orders and update status (`pending → shipped → delivered`)
-
-### 💳 Simulated Payments
-- Mark orders as **paid** with `paymentRef`
-- Captures payment time (`paidAt`) and sets `isPaid: true`
-- Prevents duplicate or invalid payment attempts
-
-### 🛡️ Security Features
-- **Helmet:** secure HTTP headers  
-- **Rate-limiting:** throttles excessive requests per IP  
-- **Mongo sanitize:** prevents NoSQL injection (`$` and `.` operators)  
-- **XSS clean:** blocks XSS payloads in request data  
-- **HPP:** prevents HTTP parameter pollution attacks  
-- **JWT middleware:** strict authorization checks  
-
-### 🧾 Logging & Error Handling
-- **morgan** for request logs in development
-- **winston** for structured production logs
-- Centralized 404 and error middleware
-
-### ⚡ Performance & Transactions
-- MongoDB **transactions** guarantee atomic stock updates during checkout
-- Lean `find()` and projections for faster queries
-- Indexed `_id` and referenced relationships (`User`, `Product`, `Cart`, `Order`)
+- Create orders from cart
+- View user orders
+- Admin can view all orders & update statuses
+- Simulated payment: mark order as “paid” with payment reference
 
 ---
 
-## 📂 Project Structure
+## 🏗️ Project Structure
 
 ```
 
 src/
-├── app.js                    # Express app setup (middlewares, routes, security)
-├── server.js                 # Entry point - connects to DB and starts server
-│
+├── app.js                     # Express app & middleware
+├── server.js                  # Entry point
 ├── config/
-│   └── db.js                 # MongoDB connection logic
-│
-├── controllers/              # Business logic
+│   └── db.js                  # MongoDB connection (Mongoose)
+├── controllers/
 │   ├── userController.js
 │   ├── productController.js
 │   ├── cartController.js
 │   └── orderController.js
-│
-├── middlewares/              # Custom middleware
-│   ├── authMiddleware.js     # JWT verification
-│   ├── adminMiddleware.js    # Role-based access control
-│   └── errorHandler.js       # Global error + 404 handler
-│
-├── models/                   # Mongoose schemas
+├── middlewares/
+│   ├── authMiddleware.js
+│   ├── adminMiddleware.js
+│   └── errorHandler.js
+├── models/
 │   ├── User.js
 │   ├── Product.js
 │   ├── Cart.js
 │   └── Order.js
-│
-├── routes/                   # API route definitions
+├── routes/
 │   ├── userRoutes.js
 │   ├── productRoutes.js
 │   ├── cartRoutes.js
 │   └── orderRoutes.js
-│
 └── utils/
-└── logger.js             # Winston logger config
-
-```
-
----
-
-## 🚀 Core API Endpoints
-
-### Auth & Users
-| Method | Endpoint | Description | Auth |
-|--------|-----------|-------------|------|
-| `POST` | `/api/users/register` | Register new user | Public |
-| `POST` | `/api/users/login` | Login & receive JWT | Public |
-| `GET` | `/api/users/me` | Get current user info | Auth |
-
----
-
-### Products
-| Method | Endpoint | Description | Auth |
-|--------|-----------|-------------|------|
-| `GET` | `/api/products` | List all products | Public |
-| `GET` | `/api/products/:id` | Get product details | Public |
-| `POST` | `/api/products` | Add new product | Admin |
-| `PUT` | `/api/products/:id` | Update product | Admin |
-| `DELETE` | `/api/products/:id` | Delete product | Admin |
-
----
-
-### Cart
-| Method | Endpoint | Description | Auth |
-|--------|-----------|-------------|------|
-| `GET` | `/api/cart` | Get user cart | User |
-| `POST` | `/api/cart/add` | Add item to cart | User |
-| `POST` | `/api/cart/remove` | Remove item from cart | User |
-
----
-
-### Orders
-| Method | Endpoint | Description | Auth |
-|--------|-----------|-------------|------|
-| `POST` | `/api/orders/checkout` | Create order from cart | User |
-| `POST` | `/api/orders/:id/pay` | Mark order as paid (simulate) | User/Admin |
-| `GET` | `/api/orders` | List own orders | User |
-| `GET` | `/api/orders/all` | View all orders | Admin |
-| `PATCH` | `/api/orders/:id/status` | Update order status | Admin |
-
----
-
-## 🔐 JWT Flow
-
-1. **Register / Login** → returns JWT (`id`, `email`, `role`)  
-2. All protected routes include:
-```
-
-Authorization: Bearer <token>
+└── logger.js
 
 ````
-3. Middleware verifies token → attaches `req.user`  
-4. Admin-only routes use both `authMiddleware` and `adminMiddleware`
 
 ---
 
-## 💡 Transaction Logic for Checkout
+## ⚙️ Setup & Installation
 
-Checkout uses **MongoDB sessions** for atomic updates:
-1. Start transaction  
-2. Validate product stock for all items  
-3. Decrement product stock  
-4. Create order document  
-5. Clear cart  
-6. Commit transaction  
+### 1️⃣ Clone repo
+```bash
+git clone https://github.com/mkshitij1763/ecommerce-api.git
+cd ecommerce-api
+````
 
-If **any step fails**, the transaction is aborted — stock and data remain unchanged.
+### 2️⃣ Install dependencies
 
----
+```bash
+npm install
+```
 
-## 🧪 Key Security Validations
+### 3️⃣ Configure environment variables
 
-| Type | Library | Protection |
-|------|----------|-------------|
-| HTTP Headers | helmet | Prevent clickjacking, XSS, MIME sniffing |
-| Rate Limiting | express-rate-limit | Prevent brute force / DoS |
-| NoSQL Injection | express-mongo-sanitize | Strip `$` and `.` from input |
-| XSS | xss-clean | Remove malicious HTML/JS |
-| HPP | hpp | Stop query parameter pollution |
-| Auth | JWT + bcrypt | Secure authentication & password storage |
-
----
-
-## 📦 Example Workflows
-
-### Register → Login → Add Product → Checkout → Pay
-1. **Register user** → `/api/users/register`
-2. **Login** → get `token`
-3. **Admin adds product** → `/api/products` (Bearer admin token)
-4. **User adds to cart** → `/api/cart/add`
-5. **Checkout** → `/api/orders/checkout`
-6. **Pay order** → `/api/orders/:id/pay`
-7. **Admin updates status** → `/api/orders/:id/status`
-
----
+Create a `.env` file in the root:
 
 ```
+PORT=5000
+JWT_SECRET=your-secret-key
+MONGO_URI=mongodb+srv://<username>:<password>@cluster0.mongodb.net/ecommerceDB
+```
+
+### 4️⃣ Start server
+
+```bash
+npm run dev        # if using nodemon
+# or
+node src/server.js
+```
+
+---
+
+## 📚 API Endpoints (Summary)
+
+| Method | Endpoint                 | Access     | Description              |
+| ------ | ------------------------ | ---------- | ------------------------ |
+| POST   | `/api/users/register`    | Public     | Register new user        |
+| POST   | `/api/users/login`       | Public     | Login user               |
+| GET    | `/api/users/me`          | Auth       | Get own profile          |
+| GET    | `/api/products`          | Public     | List products            |
+| GET    | `/api/products/:id`      | Public     | Get product details      |
+| POST   | `/api/products`          | Admin      | Add product              |
+| PUT    | `/api/products/:id`      | Admin      | Update product           |
+| DELETE | `/api/products/:id`      | Admin      | Delete product           |
+| GET    | `/api/cart`              | Auth       | Get user cart            |
+| POST   | `/api/cart/add`          | Auth       | Add product to cart      |
+| POST   | `/api/cart/remove`       | Auth       | Remove product from cart |
+| POST   | `/api/orders/checkout`   | Auth       | Checkout & create order  |
+| GET    | `/api/orders`            | Auth       | Get user orders          |
+| GET    | `/api/orders/all`        | Admin      | Get all orders           |
+| PATCH  | `/api/orders/:id/status` | Admin      | Update order status      |
+| POST   | `/api/orders/:id/pay`    | Auth/Admin | Simulate payment         |
+
+---
+
+## 🧪 Testing (Manual)
+
+Use **Postman**  to:
+
+1. Register and log in as user & admin.
+2. Add products (admin).
+3. Add products to cart (user).
+4. Checkout → order created.
+5. Admin views or updates orders.
+
+---
+
+## 🧰 Tech Stack
+
+* **Node.js** + **Express**
+* **MongoDB Atlas** + **Mongoose**
+* **JWT** for authentication
+* **bcryptjs** for password hashing
+* **helmet**, **xss-clean**, **mongo-sanitize**, **hpp** for security
+* **morgan** + **winston** for logging
+
+---
+
+
