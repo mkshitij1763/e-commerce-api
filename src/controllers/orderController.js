@@ -21,7 +21,7 @@ exports.checkout = async (req, res) => {
     }
 
     // ✅ check stock for each item
-    for (const item of cart.items) {
+    for (const item of cart.items){
       if (!item.productId) {
         await session.abortTransaction(); session.endSession();
         return res.status(400).json({ message: 'Some products no longer exist' });
